@@ -1,0 +1,13 @@
+# nginx
+virtualhosts:
+  - name: vhost1
+    datos:
+      nameserver: interno.example1.org
+      documentroot: /var/www/example1
+  - name: vhost2
+    datos:
+      nameserver: interno.example2.org
+      documentroot: /var/www/example2
+
+
+remove:

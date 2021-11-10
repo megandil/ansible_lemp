@@ -1,0 +1,3 @@
+- name: Instalar MariaDB
+  apt:
+    pkg: mariadb-server

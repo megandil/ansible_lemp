@@ -1,0 +1,53 @@
+- name: Install Nginx
+  apt:
+    pkg: nginx
+  
+- name: Configuración de virtualhost
+  template: 
+    src: etc/nginx/sites-available/vhost.j2
+    dest: /etc/nginx/sites-available/{{item["name"]}}
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - "{{virtualhosts}}"
+
+- name: Crear DocumentRoot si no existe
+  ansible.builtin.file:
+    path: /{{item["datos"]["documentroot"]}}
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+  with_items:
+    - "{{virtualhosts}}"
+
+
+- name: Add vhost symlink in sites-enabled.
+  file:
+    src: /etc/nginx/sites-available/{{item["name"]}}
+    dest: /etc/nginx/sites-enabled/{{item["name"]}}
+    state: link
+    mode: 0755
+  with_items:
+    - "{{virtualhosts}}"
+  notify: restart nginx
+  
+
+- name: Copy index.html
+  copy:
+    src: index_{{item["name"]}}.html
+    dest: /{{item["datos"]["documentroot"]}}/index.html
+    owner: www-data
+    group: www-data
+    mode: 0644
+  with_items:
+    - "{{virtualhosts}}"
+
+- name: Remove symlink
+  file:
+   path: /etc/nginx/sites-enabled/{{item["name"]}}
+   state: absent
+  with_items:
+    - "{{remove}}"
+  when: remove is iterable
